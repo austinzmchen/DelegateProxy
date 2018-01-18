@@ -79,19 +79,32 @@ private extension DelegateProxy {
         defer { free(methodDescriptions) }
         
         var protocolsCount: UInt32 = 0
-        let protocols = protocol_copyProtocolList(p, &protocolsCount)
+        guard let protocols = protocol_copyProtocolList(p, &protocolsCount) else { return Set<Selector>() }
         
         let methodSelectors = (0..<protocolMethodCount)
             .flatMap { methodDescriptions?[Int($0)] }
             .filter(DP_isMethodReturnTypeVoid)
             .flatMap { $0.name }
         
+        let protocolSelectors = collectSelectors(fromProtocolPointer: protocols, count: Int(protocolsCount))
+        
+        // original, not building for swift 3.2
+        /*
+        let protocols = protocol_copyProtocolList(p, &protocolsCount)
+        
+        let methodSelectors = (0..<protocolMethodCount)
+            .flatMap { methodDescriptions?[Int($0)] }
+            .filter(DP_isMethodReturnTypeVoid)
+            .flatMap { $0.name }
         let protocolSelectors = protocols.map { collectSelectors(fromProtocolPointer: $0, count: Int(protocolsCount)) } ?? []
+        */
         
         return Set(methodSelectors).union(protocolSelectors)
     }
     
-    static func collectSelectors(fromProtocolPointer protocolPointer: AutoreleasingUnsafeMutablePointer<Protocol?>, count: Int) -> Set<Selector> {
+    // original, not building for swift 3.2
+    // static func collectSelectors(fromProtocolPointer protocolPointer: AutoreleasingUnsafeMutablePointer<Protocol?>, count: Int) -> Set<Selector> {
+    static func collectSelectors(fromProtocolPointer protocolPointer: AutoreleasingUnsafeMutablePointer<Protocol>, count: Int) -> Set<Selector> {
         return (0..<count)
             .flatMap { protocolPointer[$0] }
             .map(collectSelectors)
