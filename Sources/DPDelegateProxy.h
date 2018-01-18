@@ -10,4 +10,6 @@
 
 - (void)interceptedSelector:(SEL _Nonnull)selector arguments:(NSArray * _Nonnull)arguments;
 
+@property (nonatomic, assign) BOOL allowsPlainDelegateCallbacks;
+@property (nonatomic, assign) id _Nullable cachedPlainDelegate;
 @end

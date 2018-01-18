@@ -12,6 +12,14 @@
 
 @implementation DPDelegateProxy
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.allowsPlainDelegateCallbacks = true; // default to true
+    }
+    return self;
+}
+
 - (void)interceptedSelector:(SEL)selector arguments:(NSArray *)arguments {
     NSAssert(NO, @"Abstract method");
 }
@@ -20,6 +28,13 @@
     if (DP_isMethodSignatureVoid(anInvocation.methodSignature)) {
         NSArray *arguments = DP_argumentsFromInvocation(anInvocation);
         [self interceptedSelector:anInvocation.selector arguments:arguments];
+        
+        if (self.allowsPlainDelegateCallbacks &&
+            self.cachedPlainDelegate != nil &&
+            [self.cachedPlainDelegate respondsToSelector:anInvocation.selector])
+        {
+            [anInvocation invokeWithTarget: self.cachedPlainDelegate];
+        }
     }
 }
 
