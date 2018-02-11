@@ -25,8 +25,17 @@ open class DelegateProxy: DPDelegateProxy {
     }
 }
 
+// https://stackoverflow.com/a/46361066
+private var hasSwizzled = false // prevent double swizzling
+
 public extension DelegateProxy {
-    final override class func initialize() {
+    // initialze method is deprecated in swift 4
+    // final override class func initialize() {
+    
+    final class func initializeSwizzle() { // should be done in didFinishLaunch
+        guard !hasSwizzled else { return }
+        hasSwizzled = true
+        
         lock()
         defer { unlock() }
         
